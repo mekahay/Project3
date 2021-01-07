@@ -77,7 +77,6 @@ cocktails.post('/', auth, async (req, res) => {
 
     try{
         const createdCocktail = await Cocktail.create(req.body)
-        // createdCocktail.ingredients.split(',')
         res.status(200).json(createdCocktail)
         console.log(createdCocktail)
     } catch (error) {

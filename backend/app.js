@@ -61,6 +61,6 @@ app.post('/login', async (req, res) => {
     }
 })
 
-
+module.exports = app;
 
 app.listen(PORT, () => {console.log("mixin' drinks on PORT", PORT)});
