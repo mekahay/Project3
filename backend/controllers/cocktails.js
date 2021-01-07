@@ -1,15 +1,26 @@
 const express = require('express');
 const cocktails = express.Router();
 const Cocktail = require('../models/cocktail.js');
+const jwt = require('jsonwebtoken')
+const SECRET = 'pourupheadshotsitdownstanduppassoutwakeupfadedfaded'
 
-cocktails.put('/shippinglist', async (req, res) => {
-    try {
-        const listOfCocktails = await cocktail.find({});
-        res.status(200).json(listOfCocktails);
-    }catch (error) {
-        res.status(400).json(error);
+const auth = async (req, res, next) => {
+    const {authorization} = req.headers;
+    if (authorization) {
+        const token = authorization.split(' ')[1];
+        try {
+            const payload = await jwt.verify(token, SECRET);
+            req.user = payload;
+            next()
+        } catch (error) {
+            res.status(400).json(error);
+        }
+    } else {
+        res.status(400).json(new Error('no token in header'))
     }
-});
+}
+
+
 
 // ===================================================================
 // INDEX
@@ -30,7 +41,7 @@ cocktails.get('/', async (req, res) => {
 // DELETE
 // DESTROY RESOURCE
 // ===================================================================
-cocktails.delete('/:id',  async (req, res) => {
+cocktails.delete('/:id', auth, async (req, res) => {
     try {
     const deletedCocktail = await Cocktail.findByIdAndRemove(req.params.id);
     res.status(200).json(deletedCocktail);
@@ -42,7 +53,7 @@ cocktails.delete('/:id',  async (req, res) => {
 // UPDATE
 //UPDATE RESOURCE
 // ===================================================================
-cocktails.put('/:id', async (req, res) => {
+cocktails.put('/:id', auth, async (req, res) => {
     try {
         const updatedCocktail = await Cocktail.findByIdAndUpdate(
             req.params.id,
@@ -59,7 +70,7 @@ cocktails.put('/:id', async (req, res) => {
 // CREATE A NEW RESOURCE
 // notes: async/awaye wait for create to finish before moving to the next command //// working with JSON data from an API now, so you need the async/await keywords so that the Promise object can fulfill it’s promise, once it does, it returns a response object
 // ===================================================================
-cocktails.post('/', async (req, res) => {
+cocktails.post('/', auth, async (req, res) => {
     const x = req.body.ingredients.split(",").map(item => item.trim());
     req.body.ingredients = x
     console.log(req.body)
@@ -77,7 +88,7 @@ cocktails.post('/', async (req, res) => {
 // SHOW 
 // DISPLAY AN INDIVIDUAL RESOURCE
 // ===================================================================
-cocktails.get('/:id', async (req, res) => {
+cocktails.get('/:id', auth, async (req, res) => {
     try {
     const showCocktail = await Cocktail.findById(req.params.id);
     res.status(200).json(showCocktail);
